@@ -2,44 +2,36 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>자막 제어판</title>
+    <title>실시간 자막 제어판</title>
     <style>
-        body { background: #222; color: white; padding: 30px; font-family: sans-serif; }
-        .box { background: #333; padding: 20px; border-radius: 10px; width: 400px; }
-        input { width: 100%; padding: 10px; margin: 10px 0; box-sizing: border-box; }
+        body { background: #222; color: white; padding: 20px; font-family: sans-serif; }
+        .panel { background: #333; padding: 20px; border-radius: 10px; width: 350px; }
+        input { width: 100%; padding: 10px; margin: 10px 0; box-sizing: border-box; background: #111; color: white; border: 1px solid #555; }
         button { width: 100%; padding: 15px; background: #00f2fe; border: none; font-weight: bold; cursor: pointer; }
-        .result-url { background: #000; padding: 10px; margin-top: 20px; word-break: break-all; font-size: 12px; border: 1px dashed #00f2fe; }
     </style>
 </head>
 <body>
-    <div class="box">
-        <h3>뮤직뱅크 자막 생성기</h3>
+    <div class="panel">
+        <h3>LIVE CONTROL</h3>
         가수: <input type="text" id="artist" value="NEW ARTIST">
         제목: <input type="text" id="title" value="NEW SONG">
-        가로위치(X): <input type="range" id="posX" min="0" max="1500" value="100">
-        세로위치(Y): <input type="range" id="posY" min="0" max="800" value="100">
-        <button onclick="generateURL()">송출 주소 생성</button>
-
-        <div id="url-output" class="result-url">버튼을 누르면 주소가 여기에 뜹니다.</div>
-        <p style="font-size: 11px; color: #aaa;">* 위 주소를 복사해서 OBS URL 칸에 넣으세요.</p>
+        X: <input type="range" id="posX" min="0" max="1500" value="50">
+        Y: <input type="range" id="posY" min="0" max="800" value="50">
+        <button onclick="send()">즉시 송출하기</button>
     </div>
 
     <script>
-        function generateURL() {
-            const artist = encodeURIComponent(document.getElementById('artist').value);
-            const title = encodeURIComponent(document.getElementById('title').value);
-            const x = document.getElementById('posX').value;
-            const y = document.getElementById('posY').value;
-            
-            // 현재 내 GitHub 페이지 주소를 자동으로 찾아서 파라미터를 붙임
-            const baseAddr = window.location.href.replace('admin.html', 'viewer.html');
-            const finalUrl = `${baseAddr}?artist=${artist}&title=${title}&x=${x}&y=${y}`;
-            
-            document.getElementById('url-output').innerText = finalUrl;
-            
-            // 클립보드 복사 기능
-            navigator.clipboard.writeText(finalUrl);
-            alert("주소가 복사되었습니다! OBS의 URL 칸에 붙여넣으세요.");
+        const bc = new BroadcastChannel('music_channel');
+
+        function send() {
+            const data = {
+                artist: document.getElementById('artist').value,
+                title: document.getElementById('title').value,
+                posX: document.getElementById('posX').value,
+                posY: document.getElementById('posY').value
+            };
+            // 무전기로 데이터 발송!
+            bc.postMessage(data);
         }
     </script>
 </body>
