@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <style>
-        body { margin: 0; padding: 0; overflow: hidden; background: transparent; font-family: sans-serif; }
-        .container { position: absolute; transition: all 0.5s ease; }
+        body { margin: 0; background: transparent; overflow: hidden; font-family: sans-serif; }
+        .container { position: absolute; bottom: 50px; left: 50px; transition: all 0.5s ease; }
         .background-bar {
             width: 450px; height: 90px;
             background: linear-gradient(135deg, rgba(20, 20, 20, 0.9) 0%, rgba(60, 60, 60, 0.8) 100%);
@@ -21,26 +21,40 @@
 </head>
 <body>
     <div class="container" id="main-container">
-        <div class="background-bar">
+        <div class="background-bar" id="target-bar">
             <div class="text-container">
-                <span class="artist" id="disp-artist">가수 이름</span>
-                <span class="title" id="disp-title">곡 제목</span>
+                <span class="artist" id="disp-artist">READY</span>
+                <span class="title" id="disp-title">WAITING DATA...</span>
             </div>
         </div>
     </div>
 
     <script>
-        // 주소창의 파라미터를 읽어오는 함수 (?artist=BTS... 등)
-        const urlParams = new URLSearchParams(window.location.search);
-        const artist = urlParams.get('artist') || "READY";
-        const title = urlParams.get('title') || "WAITING DATA...";
-        const posX = urlParams.get('x') || "50";
-        const posY = urlParams.get('y') || "50";
+        // 'music_channel'이라는 이름의 무전기 채널 개설
+        const bc = new BroadcastChannel('music_channel');
 
-        document.getElementById('disp-artist').innerText = artist;
-        document.getElementById('disp-title').innerText = title;
-        document.getElementById('main-container').style.left = posX + "px";
-        document.getElementById('main-container').style.bottom = posY + "px";
+        bc.onmessage = (event) => {
+            const data = event.data;
+            const bar = document.getElementById('target-bar');
+            const artist = document.getElementById('disp-artist');
+            const title = document.getElementById('disp-title');
+            const container = document.getElementById('main-container');
+
+            // 내용 및 위치 업데이트
+            artist.innerText = data.artist;
+            title.innerText = data.title;
+            container.style.left = data.posX + "px";
+            container.style.bottom = data.posY + "px";
+
+            // 애니메이션 재시작
+            bar.style.animation = 'none';
+            artist.style.animation = 'none';
+            title.style.animation = 'none';
+            bar.offsetHeight; // 강제 리플로우
+            bar.style.animation = '';
+            artist.style.animation = '';
+            title.style.animation = '';
+        };
     </script>
 </body>
 </html>
