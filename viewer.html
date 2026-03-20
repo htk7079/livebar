@@ -2,117 +2,45 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>뮤직뱅크 송출 화면</title>
     <style>
-        body {
-            margin: 0; padding: 0; overflow: hidden;
-            background: transparent;
-            font-family: 'Noto Sans KR', sans-serif;
-        }
-
-        /* 자막 위치 조절 컨테이너 */
-        .container {
-            position: absolute;
-            bottom: 50px;
-            left: 50px;
-            display: flex;
-            align-items: center;
-            transition: all 0.5s ease; /* 위치 이동 시 부드럽게 */
-        }
-
-        /* 배경 바 디자인 */
+        body { margin: 0; padding: 0; overflow: hidden; background: transparent; font-family: sans-serif; }
+        .container { position: absolute; transition: all 0.5s ease; }
         .background-bar {
-            position: relative;
             width: 450px; height: 90px;
-            background: linear-gradient(135deg, rgba(20, 20, 20, 0.95) 0%, rgba(60, 60, 60, 0.8) 100%);
-            border-left: 8px solid #00f2fe;
-            box-shadow: 10px 10px 20px rgba(0,0,0,0.5);
-            border-radius: 4px;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            padding-left: 25px;
-            
-            /* 애니메이션 정의 */
-            animation: slideIn 0.8s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+            background: linear-gradient(135deg, rgba(20, 20, 20, 0.9) 0%, rgba(60, 60, 60, 0.8) 100%);
+            border-left: 8px solid #00f2fe; border-radius: 4px;
+            display: flex; align-items: center; padding-left: 25px;
+            animation: slideIn 0.8s forwards;
         }
-
         .text-container { display: flex; flex-direction: column; }
-
-        .artist {
-            font-size: 18px; color: #00f2fe; font-weight: 500; margin-bottom: 2px;
-            opacity: 0;
-            animation: fadeUp 0.6s 0.5s forwards;
-        }
-
-        .title {
-            font-size: 30px; color: white; font-weight: 800;
-            opacity: 0;
-            animation: fadeUp 0.6s 0.7s forwards;
-        }
-
-        /* 애니메이션 키프레임 */
-        @keyframes slideIn {
-            0% { transform: translateX(-110%); opacity: 0; }
-            100% { transform: translateX(0); opacity: 1; }
-        }
-
-        @keyframes fadeUp {
-            0% { transform: translateY(15px); opacity: 0; }
-            100% { transform: translateY(0); opacity: 1; }
-        }
+        .artist { font-size: 18px; color: #00f2fe; animation: fadeUp 0.6s 0.5s forwards; opacity: 0; }
+        .title { font-size: 30px; color: white; font-weight: bold; animation: fadeUp 0.6s 0.7s forwards; opacity: 0; }
+        @keyframes slideIn { 0% { transform: translateX(-110%); } 100% { transform: translateX(0); } }
+        @keyframes fadeUp { 0% { transform: translateY(15px); opacity: 0; } 100% { transform: translateY(0); opacity: 1; } }
     </style>
 </head>
 <body>
-
-<div class="container" id="main-container">
-    <div class="background-bar" id="target-bar">
-        <div class="text-container">
-            <span class="artist" id="disp-artist">READY</span>
-            <span class="title" id="disp-title">WAITING DATA...</span>
+    <div class="container" id="main-container">
+        <div class="background-bar">
+            <div class="text-container">
+                <span class="artist" id="disp-artist">가수 이름</span>
+                <span class="title" id="disp-title">곡 제목</span>
+            </div>
         </div>
     </div>
-</div>
 
-<script>
-    // 데이터를 화면에 뿌리고 애니메이션을 재시작하는 함수
-    function refreshDisplay(data) {
-        const container = document.getElementById('main-container');
-        const bar = document.getElementById('target-bar');
-        const artist = document.getElementById('disp-artist');
-        const title = document.getElementById('disp-title');
+    <script>
+        // 주소창의 파라미터를 읽어오는 함수 (?artist=BTS... 등)
+        const urlParams = new URLSearchParams(window.location.search);
+        const artist = urlParams.get('artist') || "READY";
+        const title = urlParams.get('title') || "WAITING DATA...";
+        const posX = urlParams.get('x') || "50";
+        const posY = urlParams.get('y') || "50";
 
-        // 1. 데이터 교체
-        artist.innerText = data.artist || "가수 미지정";
-        title.innerText = data.title || "곡 제목 미지정";
-        container.style.bottom = (data.posY || 50) + "px";
-        container.style.left = (data.posX || 50) + "px";
-
-        // 2. 애니메이션 초기화 (강제 리플로우)
-        bar.style.animation = 'none';
-        artist.style.animation = 'none';
-        title.style.animation = 'none';
-        
-        bar.offsetHeight; /* trick: 이 코드가 실행되어야 애니메이션이 초기화됨 */
-
-        bar.style.animation = '';
-        artist.style.animation = '';
-        title.style.animation = '';
-    }
-
-    // 다른 창(Admin)에서 데이터가 바뀌었을 때 실행
-    window.addEventListener('storage', (e) => {
-        if (e.key === 'musicData') {
-            refreshDisplay(JSON.parse(e.newValue));
-        }
-    });
-
-    // 페이지가 처음 켜졌을 때도 마지막 데이터 불러오기
-    window.onload = () => {
-        const saved = localStorage.getItem('musicData');
-        if (saved) refreshDisplay(JSON.parse(saved));
-    };
-</script>
-
+        document.getElementById('disp-artist').innerText = artist;
+        document.getElementById('disp-title').innerText = title;
+        document.getElementById('main-container').style.left = posX + "px";
+        document.getElementById('main-container').style.bottom = posY + "px";
+    </script>
 </body>
 </html>
